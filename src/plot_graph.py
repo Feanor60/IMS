@@ -1,18 +1,24 @@
 #!/usr/bin/env python
 import matplotlib.pyplot as plt
 
-x = []
-y = []
+file = open('./input_data.txt', 'r')
+lines = file.readlines()
 
-for line in open('./src/output_data.txt', 'r'):
-    lines = [i for i in line.split()]
-    x.append(lines[0])
-    y.append(int(lines[1]))
-      
+x = []
+y = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021]
+
+for line in lines:
+    line = line.split() # split by space by default
+    tmp = 0
+    for letter in line:
+        tmp += int(letter)
+    x.append(tmp)
+print(x)
+
 plt.title("number of electric cars in CZR")
 plt.xlabel('year')
 plt.ylabel('electric cars')
-plt.yticks(y)
-plt.plot(x, y, marker = 'o', c = 'g')
-  
+plt.yticks(x)
+plt.plot(y, x, marker = 'o', c = 'g')
+
 plt.show()
