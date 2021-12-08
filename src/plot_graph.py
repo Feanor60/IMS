@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import matplotlib.pyplot as plt
 
-file = open('./input_data.txt', 'r')
+file = open('./src/input_data.txt', 'r')
 lines = file.readlines()
 
 x = []
