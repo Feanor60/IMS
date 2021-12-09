@@ -22,34 +22,33 @@ int main(int argc, char **argv) {
 	ifstream fin;
 	fin.open("./src/input_data.txt", ifstream::in);
 
-	int count = 0;
+	int count = 1;
 
 	while(!fin.eof()) {
-		count++;
 		double x;
 		fin >> x;
-		cout << "number " << count << " is: " << x << '\n';
+		cout << "number " << count++ << " is: " << x << '\n';
 		vect.push_back(x);
 	}
 
 	long double mean = 0;
 
-	for(std::vector<double>::size_type i = 0; i != vect.size(); i++) {
+	for(unsigned int i = 0; i != vect.size(); i++) {
 		mean += vect[i];
 	}
 
-	mean = mean/vect.size();
+	mean = mean / vect.size();
 
 	cout << "mean is: " << mean << '\n';
 
 	vector<double> temp;
 
-	for(std::vector<double>::size_type i = 0; i != vect.size(); i++) {
+	for(unsigned int i = 0; i != vect.size(); i++) {
 		temp.push_back(vect[i] - mean);
 	}
 
 	double sqr_dev = 0;
-	for(std::vector<double>::size_type i = 0; i != vect.size(); i++) {
+	for(unsigned int i = 0; i != vect.size(); i++) {
 		sqr_dev += temp[i] * temp[i];
 	}
 
@@ -57,10 +56,11 @@ int main(int argc, char **argv) {
 
 	
 	vector<double> autoCorr;
-	for(std::vector<double>::size_type i = 1; i != vect.size(); i++) {
+	// should there really be 1 here? not 0?
+	for(unsigned int i = 1; i != vect.size(); i++) {
 		double result = 0;
 		int count = 0;
-		for(std::vector<double>::size_type j = i; j != temp.size(); j++) {
+		for(unsigned int j = i; j != temp.size(); j++) {
 			result += temp[count]*temp[j];
 			count++;
 		}
@@ -68,13 +68,12 @@ int main(int argc, char **argv) {
 	}
 
 	double goodCorSum = 0;
-	int goodCorCount = 0;
 	vector<int> index;
-	for(std::vector<double>::size_type i = 0; i != vect.size(); i++) {
+
+	for(unsigned int i = 0; i != vect.size(); i++) {
 		autoCorr[i] = autoCorr[i]/sqr_dev;
-		if(abs(autoCorr[i]) > 0.2) {
+		if(abs(autoCorr[i]) > 0.2) {	// 0.2 is a value we've decided, perhaps experiment w/ it a bit
 			goodCorSum += autoCorr[i];
-			goodCorCount++;
 			index.push_back(i);
 			cout << "autocorrelation for lag " << i << " is: " << autoCorr[i] << '\n';
 		}
@@ -82,8 +81,8 @@ int main(int argc, char **argv) {
 
 	double prediction = 0;
 
-	for(std::vector<double>::size_type i = 0; i != index.size(); i++) {
-		prediction += vect[index[i]] * ((autoCorr[index[i]] * 100)/goodCorSum);
+	for(unsigned int i = 0; i != index.size(); i++) {
+		prediction += vect[index[i]] * ((autoCorr[index[i]] * 100) / goodCorSum);
 		cout << "prediction is: " << prediction << '\n';
 	}
 
