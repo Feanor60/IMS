@@ -15,7 +15,7 @@
 #include <iostream>
 #include <string>
 
-#define MIN_INFL 0.158
+#define MIN_INFL 0.225
 
 using namespace std;
 
@@ -61,13 +61,13 @@ void experiment_1(deque<double> vect);
  */
 void experiment_2(deque<double> vect);
 
+void experiment_3(deque<double> vect);
+
 int main(int argc, char **argv) {
   deque<double> vect;
 
   ifstream fin;
   fin.open("./src/input_data.txt", ifstream::in);
-
-  // int count = 1;
 
   while (true) {
     double x;
@@ -80,12 +80,13 @@ int main(int argc, char **argv) {
 
   experiment_1(vect);
   experiment_2(vect);
+  experiment_3(vect);
 
   return 0;
 }
 
 void experiment_1(deque<double> vect) {
-  double minInfluence = 0.14;
+  double minInfluence = MIN_INFL;
   double prediction = 0;
   int year_pred = 0;
 
@@ -124,31 +125,97 @@ void experiment_1(deque<double> vect) {
 
 void experiment_2(deque<double> vect) {
   deque<double> future_predict;
-  double min_infl = 0.158;
+  double min_infl = MIN_INFL;
   future_predict = vect;
   double next_pred = 0;
   double year_pred = 0;
-
-  cout << "here\n";
+  int year_count = 2021;
+  double summ = 0;
 
   // add December of 2021
   next_pred = calculate_prediction(future_predict, min_infl);
   next_pred = floor(next_pred);
   future_predict.push_front(next_pred);
 
-  cout << "here\n";
-
-  for (unsigned int i = future_predict.size() - 11; i <= future_predict.size();
-       i++) {
+  for (unsigned int i = 0; i <= 11; i++) {
     year_pred += future_predict[i];
-    cout << "adding " << future_predict[i] << "\n";
   }
+
+  cout << "################ EXPERIMENT 2 ################\n";
 
   for (unsigned int i = 0; i < 108; i++) {
-    year_pred = 0;
+    if(i % 12 == 0) {
+      cout << year_count << "   " << year_pred << "\n";
+      summ += year_pred;
+      year_pred = 0;
+      year_count++;
+    }
+
+    next_pred = calculate_prediction(future_predict, min_infl);
+    next_pred = floor(next_pred);
+    future_predict.push_front(next_pred);
+
+    year_pred += next_pred;
   }
 
+  cout << year_count << "   " << year_pred << "\n";
+
+  summ += year_pred;
+  summ += 5200;
+  cout << "Celkem elektro aut: " <<  summ << "\n";
+  cout << "##############################################\n\n";
+
   return;
+}
+
+void experiment_3(deque<double> vect) {
+  deque<double> future_predict;
+  double min_infl = MIN_INFL;
+  future_predict = vect;
+  double next_pred = 0;
+  double year_pred = 0;
+  int year_count = 2021;
+  double summ = 0;
+
+  // add December of 2021
+  next_pred = calculate_prediction(future_predict, min_infl);
+  next_pred = floor(next_pred);
+  future_predict.push_front(next_pred);
+
+  for (unsigned int i = 0; i <= 11; i++) {
+    year_pred += future_predict[i];
+  }
+
+  cout << "################ EXPERIMENT 3 ################\n";
+
+  for (unsigned int i = 0; i < 108; i++) {
+    if(i % 12 == 0) {
+      cout << year_count << "   " << year_pred << "\n";
+      summ += year_pred;
+      year_pred = 0;
+      year_count++;
+    }
+
+    next_pred = calculate_prediction(future_predict, min_infl);
+    if(i <= 11) {
+      next_pred = next_pred *1.2;
+    }
+
+    next_pred = floor(next_pred);
+    future_predict.push_front(next_pred);
+
+    year_pred += next_pred;
+  }
+
+  cout << year_count << "   " << year_pred << "\n";
+
+  summ += year_pred;
+  summ += 5200;
+  cout << "Celkem elektro aut: " <<  summ << "\n";
+  cout << "##############################################\n\n";
+
+  return;
+
 }
 
 double calculate_prediction(deque<double> vect, double minInfluence) {
@@ -208,12 +275,12 @@ double calculate_prediction(deque<double> vect, double minInfluence) {
      cout << "value of autocor at index " << i << " is: " << autoCorr[index[i]]
           << '\n';
      cout << "goodsum cor is: " << goodCorSum << '\n';*/
-    if (index[i] == 0) {
+    //if (index[i] == 0) {
       prediction += vect[index[i]] * (((autoCorr[index[i]]) / goodCorSum));
-    } else {
-      prediction += vect[index[i]] *
-                    (((autoCorr[index[i]]) / goodCorSum) * (1.0 / (index[i])));
-    }
+    //} else {
+     // prediction += vect[index[i]] *
+       //             (((autoCorr[index[i]]) / goodCorSum) * (1.0 / (index[i])));
+    //}
     // cout << "prediction is: " << prediction << '\n';
   }
 
