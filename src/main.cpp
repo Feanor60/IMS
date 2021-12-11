@@ -6,6 +6,7 @@
  * @description: #TODO
  */
 
+#include <math.h>
 #include <stdio.h>
 
 #include <cstdlib>
@@ -13,7 +14,8 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <vector>
+
+#define MIN_INFL 0.158
 
 using namespace std;
 
@@ -37,17 +39,27 @@ double calculate_prediction(deque<double> vect, double minInfulence);
  * @name: experiment_1
  * @param vect: vector with values of time series (sales of electromobiles in
  * our case)
- * @brief: try to predict last 20 months of electric cars sales, based on sales
- * made previous to last 20 months
+ * @brief: try to predict last 12 months of electric cars sales, based on sales
+ * made previous to last 12 months
  * @description: in experiment one, we will determine what is the best level of
  * influence of autocorrelation that still should be valid. For example, if
  * there is a value 0.8 as a result of autocorrelation offsetet by 1 that means,
- * that a previous moth was has a significant influence on predicted value, if
+ * that a previous month had a significant influence on predicted value, if
  * its 0.2 that influence is much lower. This will be done by predicting last 20
- * months of sales and the shifting the minimal level of influence until best
+ * months of sales and the shifting the mini  mal level of influence until best
  * result are achieved.
  */
 void experiment_1(deque<double> vect);
+
+/**
+ * @name: experiment_2
+ * @param vect: vector with values of time series (sales of electromobiles in
+ * our case)
+ * @brief: predict electric car sales for every year until 2030
+ * @description: using the level of influence determined in experiment 1
+ *               we will predict next 9 years, month by month
+ */
+void experiment_2(deque<double> vect);
 
 int main(int argc, char **argv) {
   deque<double> vect;
@@ -67,40 +79,74 @@ int main(int argc, char **argv) {
   }
 
   experiment_1(vect);
+  experiment_2(vect);
 
   return 0;
 }
 
 void experiment_1(deque<double> vect) {
-  unsigned int count = vect.size() - 20;
-  double minInfluence = 0.01;
-  // int predictNum = 0;
+  double minInfluence = 0.14;
   double prediction = 0;
+  int year_pred = 0;
 
+  deque<string> months = {"Listopad", "Říjen",  "Září",   "Srpen",
+                          "Červenec", "Červen", "Květen", "Duben",
+                          "Březen",   "Únor",   "Leden",  "Prosinec"};
   deque<double> smallerVect = vect;
 
-  for (int i = 0; i <= 19; i++) {
+  cout << "################ EXPERIMENT 1 ################ \n";
+
+  for (int i = 0; i <= 11; i++) {
     smallerVect.pop_front();
   }
 
-  // smallerVect.erase(smallerVect.begin(), smallerVect.begin() + 9);
-
-  for (unsigned long int i = 0; i <= smallerVect.size(); i++) {
-    cout << smallerVect[i] << ", ";
-  }
-
-  cout << '\n';
-
-  // while (predictNum <= 20) {
-  while (minInfluence <= 1) {
+  while (smallerVect.size() != (vect.size())) {
     prediction = calculate_prediction(smallerVect, minInfluence);
-    cout << "Prediction for level of influnce " << minInfluence
-         << " is: " << prediction << "\n";
-    minInfluence += 0.01;
-    cout << "---------------------------------------------\n\n";
+
+    prediction = floor(prediction);
+
+    cout << "Predikce: " << prediction
+         << "    reálně: " << vect[vect.size() - smallerVect.size() - 1] << "  "
+         << months[vect.size() - smallerVect.size() - 1] << "\n";
+
+    year_pred += prediction;
+    smallerVect.push_front(prediction);
   }
-  count++;
-  //}
+
+  cout << "----------------------------------------------\n";
+
+  cout << "Součet:   " << year_pred << "    "
+       << "       3256\n";
+  cout << "##############################################\n\n";
+
+  return;
+}
+
+void experiment_2(deque<double> vect) {
+  deque<double> future_predict;
+  double min_infl = 0.158;
+  future_predict = vect;
+  double next_pred = 0;
+  double year_pred = 0;
+
+  cout << "here\n";
+
+  // add December of 2021
+  next_pred = calculate_prediction(future_predict, min_infl);
+  next_pred = floor(next_pred);
+  future_predict.push_front(next_pred);
+
+  cout << "here\n";
+
+  for (unsigned int i = future_predict.size() - 11; i <= future_predict.size();
+       i++) {
+    year_pred += future_predict[i];
+    cout << "adding " << future_predict[i] << "\n";
+  }
+
+  for (unsigned int i = 0; i < 108; i++) {
+    year_pred = 0;
+  }
 
   return;
 }
@@ -114,7 +160,7 @@ double calculate_prediction(deque<double> vect, double minInfluence) {
 
   mean = mean / vect.size();
 
-  cout << "mean is: " << mean << '\n';
+  // cout << "mean is: " << mean << '\n';
 
   deque<double> temp;
 
@@ -127,11 +173,10 @@ double calculate_prediction(deque<double> vect, double minInfluence) {
     sqr_dev += temp[i] * temp[i];
   }
 
-  cout << "sum of square deviations is: " << sqr_dev << '\n';
+  // cout << "sum of square deviations is: " << sqr_dev << '\n';
 
   deque<double> autoCorr;
-  // should there really be 1 here? not 0?
-  for (unsigned int i = 1; i != vect.size(); i++) {
+  for (unsigned int i = 0; i != vect.size(); i++) {
     double result = 0;
     int count = 0;
     for (unsigned int j = i; j != temp.size(); j++) {
@@ -149,22 +194,27 @@ double calculate_prediction(deque<double> vect, double minInfluence) {
     if (abs(autoCorr[i]) > minInfluence) {
       goodCorSum += autoCorr[i];
       index.push_back(i);
-      //cout << "autocorrelation for lag " << i << " is: " << autoCorr[i] << '\n';
+      // cout << "autocorrelation for lag " << i << " is: " << autoCorr[i] <<
+      // '\n';
     }
   }
 
   double prediction = 0;
 
-  
-  if(index.empty()) return prediction;
+  if (index.empty()) return prediction;
 
-  for (unsigned int i = 0; i <= index.size(); i++) {
-   /* cout << "value at index " << i << " is: " << vect[index[i]] << '\n';
-    cout << "value of autocor at index " << i << " is: " << autoCorr[index[i]]
-         << '\n';
-    cout << "goodsum cor is: " << goodCorSum << '\n';*/
-    prediction += vect[index[i]] * ((autoCorr[index[i]]) / goodCorSum);
-    cout << "prediction is: " << prediction << '\n';
+  for (unsigned int i = 0; i < index.size(); i++) {
+    /* cout << "value at index " << i << " is: " << vect[index[i]] << '\n';
+     cout << "value of autocor at index " << i << " is: " << autoCorr[index[i]]
+          << '\n';
+     cout << "goodsum cor is: " << goodCorSum << '\n';*/
+    if (index[i] == 0) {
+      prediction += vect[index[i]] * (((autoCorr[index[i]]) / goodCorSum));
+    } else {
+      prediction += vect[index[i]] *
+                    (((autoCorr[index[i]]) / goodCorSum) * (1.0 / (index[i])));
+    }
+    // cout << "prediction is: " << prediction << '\n';
   }
 
   return prediction;
