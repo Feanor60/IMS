@@ -19,7 +19,7 @@
 #include <iostream>
 #include <string>
 
-#define MIN_INFL 0.2
+#define MIN_INFL 0.194
 #define CURR_ELECTRO 7109 
 
 using namespace std;
@@ -119,15 +119,18 @@ void experiment_1(deque<double> vect) {
 
     realitPerc = (year_pred / 2377.0) * 100;
 
+    if( realitPerc >= 50 && realitPerc <= 150) {
     cout << "Hranice koeficientu autokorelace " << minInfluence << " predikce "
          << year_pred << "   odpovídá realitě z " << realitPerc << " %\n";
+
+    }
 
     for (int i = 0; i <= 11; i++) {
       smallerVect.pop_front();
     }
 
     year_pred = 0;
-    minInfluence += 0.01;
+    minInfluence += 0.001;
   }
 
   minInfluence = MIN_INFL;
@@ -280,7 +283,7 @@ double calculate_prediction(deque<double> vect, double minInfluence) {
   // cout << "sum of square deviations is: " << sqr_dev << '\n';
 
   deque<double> autoCorr;
-  for (unsigned int i = 0; i != vect.size(); i++) {
+  for (unsigned int i = 1; i != vect.size(); i++) {
     double result = 0;
     int count = 0;
     for (unsigned int j = i; j != temp.size(); j++) {
