@@ -6,6 +6,10 @@
  * @description: #TODO
  */
 
+/* Minor edits by:
+ * Vojtěch Fiala (xfiala61)
+*/
+
 #include <math.h>
 #include <stdio.h>
 
@@ -16,6 +20,7 @@
 #include <string>
 
 #define MIN_INFL 0.2
+#define CURR_ELECTRO 7109 
 
 using namespace std;
 
@@ -180,8 +185,8 @@ void experiment_2(deque<double> vect) {
 
   for (unsigned int i = 0; i < 108; i++) {
     if (i % 12 == 0) {
-      cout << year_count << "   " << year_pred << "\n";
       summ += year_pred;
+      cout << year_count << "   " << year_pred << "   " << summ+CURR_ELECTRO << "\n";
       year_pred = 0;
       year_count++;
     }
@@ -193,11 +198,10 @@ void experiment_2(deque<double> vect) {
     year_pred += next_pred;
   }
 
-  cout << year_count << "   " << year_pred << "\n";
-
   summ += year_pred;
-  summ += 5200;
-  cout << "Celkem elektro aut: " << summ << "\n";
+
+  cout << year_count << "   " << year_pred << "   " << summ+CURR_ELECTRO << "\n";
+  cout << "Celkem elektro aut: " << summ+CURR_ELECTRO << "\n";
   cout << "##############################################\n\n";
 
   return;
@@ -225,8 +229,8 @@ void experiment_3(deque<double> vect) {
 
   for (unsigned int i = 0; i < 108; i++) {
     if (i % 12 == 0) {
-      cout << year_count << "   " << year_pred << "\n";
       summ += year_pred;
+      cout << year_count << "   " << year_pred << "   " << summ+CURR_ELECTRO << "\n";
       year_pred = 0;
       year_count++;
     }
@@ -242,11 +246,10 @@ void experiment_3(deque<double> vect) {
     year_pred += next_pred;
   }
 
-  cout << year_count << "   " << year_pred << "\n";
 
   summ += year_pred;
-  summ += 5200;
-  cout << "Celkem elektro aut: " << summ << "\n";
+  cout << year_count << "   " << year_pred << "   " << summ+CURR_ELECTRO << "\n";
+  cout << "Celkem elektro aut: " << summ+CURR_ELECTRO << "\n";
   cout << "##############################################\n\n";
 
   return;
