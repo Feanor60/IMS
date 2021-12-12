@@ -15,7 +15,7 @@
 #include <iostream>
 #include <string>
 
-#define MIN_INFL 0.225
+#define MIN_INFL 0.2
 
 using namespace std;
 
@@ -86,9 +86,10 @@ int main(int argc, char **argv) {
 }
 
 void experiment_1(deque<double> vect) {
-  double minInfluence = MIN_INFL;
+  double minInfluence = 0.01;
   double prediction = 0;
   int year_pred = 0;
+  double realitPerc = 0;
 
   deque<string> months = {"Listopad", "Říjen",  "Září",   "Srpen",
                           "Červenec", "Červen", "Květen", "Duben",
@@ -101,15 +102,49 @@ void experiment_1(deque<double> vect) {
     smallerVect.pop_front();
   }
 
-  while (smallerVect.size() != (vect.size())) {
+  while (minInfluence <= 1) {
+    while (smallerVect.size() != (vect.size())) {
+      prediction = calculate_prediction(smallerVect, minInfluence);
+
+      prediction = floor(prediction);
+
+      year_pred += prediction;
+      smallerVect.push_front(prediction);
+    }
+
+    realitPerc = (year_pred / 2377.0) * 100;
+
+    cout << "Hranice koeficientu autokorelace " << minInfluence << " predikce "
+         << year_pred << "   rozdil o proti realitě " << realitPerc << " %\n";
+
+    for (int i = 0; i <= 11; i++) {
+      smallerVect.pop_front();
+    }
+
+    year_pred = 0;
+    minInfluence += 0.01;
+  }
+
+  minInfluence = MIN_INFL;
+  int toggle = 0;
+
+  while (smallerVect.size() < (vect.size())) {
     prediction = calculate_prediction(smallerVect, minInfluence);
 
     prediction = floor(prediction);
 
-    cout << "Predikce: " << prediction
-         << "    reálně: " << vect[vect.size() - smallerVect.size() - 1] << "  "
-         << months[vect.size() - smallerVect.size() - 1] << "\n";
+    if (toggle == 0) {
+      toggle = 1;
+      cout << "Predikce: " << prediction << "    reálně: 198 ("
+           << vect[vect.size() - smallerVect.size() - 1] << ")  "
+           << months[vect.size() - smallerVect.size() - 1] << "\n";
 
+    } else {
+      cout << "Predikce: " << prediction
+           << "    reálně: " << vect[vect.size() - smallerVect.size() - 1]
+           << "         " << months[vect.size() - smallerVect.size() - 1]
+           << "\n";
+    }
     year_pred += prediction;
     smallerVect.push_front(prediction);
   }
@@ -117,7 +152,7 @@ void experiment_1(deque<double> vect) {
   cout << "----------------------------------------------\n";
 
   cout << "Součet:   " << year_pred << "    "
-       << "       3256\n";
+       << "       2377 (3314)\n";
   cout << "##############################################\n\n";
 
   return;
@@ -144,7 +179,7 @@ void experiment_2(deque<double> vect) {
   cout << "################ EXPERIMENT 2 ################\n";
 
   for (unsigned int i = 0; i < 108; i++) {
-    if(i % 12 == 0) {
+    if (i % 12 == 0) {
       cout << year_count << "   " << year_pred << "\n";
       summ += year_pred;
       year_pred = 0;
@@ -162,7 +197,7 @@ void experiment_2(deque<double> vect) {
 
   summ += year_pred;
   summ += 5200;
-  cout << "Celkem elektro aut: " <<  summ << "\n";
+  cout << "Celkem elektro aut: " << summ << "\n";
   cout << "##############################################\n\n";
 
   return;
@@ -189,7 +224,7 @@ void experiment_3(deque<double> vect) {
   cout << "################ EXPERIMENT 3 ################\n";
 
   for (unsigned int i = 0; i < 108; i++) {
-    if(i % 12 == 0) {
+    if (i % 12 == 0) {
       cout << year_count << "   " << year_pred << "\n";
       summ += year_pred;
       year_pred = 0;
@@ -197,8 +232,8 @@ void experiment_3(deque<double> vect) {
     }
 
     next_pred = calculate_prediction(future_predict, min_infl);
-    if(i <= 11) {
-      next_pred = next_pred *1.2;
+    if (i <= 11) {
+      next_pred = next_pred * 1.021875;
     }
 
     next_pred = floor(next_pred);
@@ -211,11 +246,10 @@ void experiment_3(deque<double> vect) {
 
   summ += year_pred;
   summ += 5200;
-  cout << "Celkem elektro aut: " <<  summ << "\n";
+  cout << "Celkem elektro aut: " << summ << "\n";
   cout << "##############################################\n\n";
 
   return;
-
 }
 
 double calculate_prediction(deque<double> vect, double minInfluence) {
@@ -275,11 +309,11 @@ double calculate_prediction(deque<double> vect, double minInfluence) {
      cout << "value of autocor at index " << i << " is: " << autoCorr[index[i]]
           << '\n';
      cout << "goodsum cor is: " << goodCorSum << '\n';*/
-    //if (index[i] == 0) {
-      prediction += vect[index[i]] * (((autoCorr[index[i]]) / goodCorSum));
+    // if (index[i] == 0) {
+    prediction += vect[index[i]] * (((autoCorr[index[i]]) / goodCorSum));
     //} else {
-     // prediction += vect[index[i]] *
-       //             (((autoCorr[index[i]]) / goodCorSum) * (1.0 / (index[i])));
+    // prediction += vect[index[i]] *
+    //             (((autoCorr[index[i]]) / goodCorSum) * (1.0 / (index[i])));
     //}
     // cout << "prediction is: " << prediction << '\n';
   }
