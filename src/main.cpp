@@ -115,7 +115,7 @@ void experiment_1(deque<double> vect) {
     realitPerc = (year_pred / 2377.0) * 100;
 
     cout << "Hranice koeficientu autokorelace " << minInfluence << " predikce "
-         << year_pred << "   rozdil o proti realitě " << realitPerc << " %\n";
+         << year_pred << "   odpovídá realitě z " << realitPerc << " %\n";
 
     for (int i = 0; i <= 11; i++) {
       smallerVect.pop_front();
