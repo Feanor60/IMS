@@ -12,21 +12,22 @@
 
 #include <math.h>
 #include <stdio.h>
-
 #include <cstdlib>
 #include <deque>
 #include <fstream>
 #include <iostream>
 #include <string>
 
+// minimal value of autocorrelation found out in experiment 1
 #define MIN_INFL 0.194
+// number of electromobiles sold prior to 2021
 #define CURR_ELECTRO 7109 
 
 using namespace std;
 
 /**
  * @name: calculate_prediction
- * @param vect: vector with values of time series (sales of electromobiles in
+ * @param vect: deque with values of time series (sales of electromobiles in
  * our case)
  * @param minInfluence: minimal level of influence that autocorrelation must
  * have to be used in the prediction
@@ -35,14 +36,14 @@ using namespace std;
  * next value of time series recieved in param vect. The influence of previous
  * months on the next month is predicted using autocorrelation. Autocorrelation
  * returns a value in interval <-1;1>, the bigger the value, the bigger the
- * impact. #TODO finish this
+ * impact. prediction is calculated by adding important values.
  * @retval: predicted value
  */
 double calculate_prediction(deque<double> vect, double minInfulence);
 
 /**
  * @name: experiment_1
- * @param vect: vector with values of time series (sales of electromobiles in
+ * @param vect: deque with values of time series (sales of electromobiles in
  * our case)
  * @brief: try to predict last 12 months of electric cars sales, based on sales
  * made previous to last 12 months
@@ -50,15 +51,15 @@ double calculate_prediction(deque<double> vect, double minInfulence);
  * influence of autocorrelation that still should be valid. For example, if
  * there is a value 0.8 as a result of autocorrelation offsetet by 1 that means,
  * that a previous month had a significant influence on predicted value, if
- * its 0.2 that influence is much lower. This will be done by predicting last 20
- * months of sales and the shifting the mini  mal level of influence until best
- * result are achieved.
+ * its 0.2 that influence is much lower. This will be done by predicting last 12
+ * months of sales and the shifting the minimal value of autocorrelation coeficient
+ * until best result are achieved.
  */
 void experiment_1(deque<double> vect);
 
 /**
  * @name: experiment_2
- * @param vect: vector with values of time series (sales of electromobiles in
+ * @param vect: deque with values of time series (sales of electromobiles in
  * our case)
  * @brief: predict electric car sales for every year until 2030
  * @description: using the level of influence determined in experiment 1
@@ -66,6 +67,12 @@ void experiment_1(deque<double> vect);
  */
 void experiment_2(deque<double> vect);
 
+/**
+ * @name: experiment_3
+ * @param vect: deque with values of time series (sales of electromobiles in
+ * @brief: predict electric car sales for every year until 2030 when taking grant
+ *         from the goverment into account
+ */
 void experiment_3(deque<double> vect);
 
 int main(int argc, char **argv) {
@@ -74,6 +81,7 @@ int main(int argc, char **argv) {
   ifstream fin;
   fin.open("./src/input_data.txt", ifstream::in);
 
+  // load data set from file
   while (true) {
     double x;
     fin >> x;
@@ -107,6 +115,7 @@ void experiment_1(deque<double> vect) {
     smallerVect.pop_front();
   }
 
+  // iterate until maximum value of autocorrelation coeficient
   while (minInfluence <= 1) {
     while (smallerVect.size() != (vect.size())) {
       prediction = calculate_prediction(smallerVect, minInfluence);
@@ -117,8 +126,12 @@ void experiment_1(deque<double> vect) {
       smallerVect.push_front(prediction);
     }
 
+
+    // percentual value of predictet sale
+    // 2377 is number of cars actually sold (edited to not have unpredicted spike)
     realitPerc = (year_pred / 2377.0) * 100;
 
+    // if the difference between predicted and real value is not very big print it out
     if( realitPerc >= 50 && realitPerc <= 150) {
     cout << "Hranice koeficientu autokorelace " << minInfluence << " predikce "
          << year_pred << "   odpovídá realitě z " << realitPerc << " %\n";
@@ -136,6 +149,7 @@ void experiment_1(deque<double> vect) {
   minInfluence = MIN_INFL;
   int toggle = 0;
 
+  // calculate prediction from december 2020 to november 2021
   while (smallerVect.size() < (vect.size())) {
     prediction = calculate_prediction(smallerVect, minInfluence);
 
@@ -186,6 +200,7 @@ void experiment_2(deque<double> vect) {
 
   cout << "################ EXPERIMENT 2 ################\n";
 
+  // calculate preddiction for next 9 years month by month
   for (unsigned int i = 0; i < 108; i++) {
     if (i % 12 == 0) {
       summ += year_pred;
@@ -239,6 +254,9 @@ void experiment_3(deque<double> vect) {
     }
 
     next_pred = calculate_prediction(future_predict, min_infl);
+
+    // mltiplay first year predicted by coeficient based on grant given by goverment
+    // in other countries
     if (i <= 11) {
       next_pred = next_pred * 1.021875;
     }
@@ -261,13 +279,12 @@ void experiment_3(deque<double> vect) {
 double calculate_prediction(deque<double> vect, double minInfluence) {
   long double mean = 0;
 
+  // calculate mean
   for (unsigned int i = 0; i != vect.size(); i++) {
     mean += vect[i];
   }
 
   mean = mean / vect.size();
-
-  // cout << "mean is: " << mean << '\n';
 
   deque<double> temp;
 
@@ -275,13 +292,13 @@ double calculate_prediction(deque<double> vect, double minInfluence) {
     temp.push_back(vect[i] - mean);
   }
 
+  // get square root of deviations
   double sqr_dev = 0;
   for (unsigned int i = 0; i != vect.size(); i++) {
     sqr_dev += temp[i] * temp[i];
   }
 
-  // cout << "sum of square deviations is: " << sqr_dev << '\n';
-
+  // calculate all autocorrelation coeficients
   deque<double> autoCorr;
   for (unsigned int i = 1; i != vect.size(); i++) {
     double result = 0;
@@ -296,13 +313,12 @@ double calculate_prediction(deque<double> vect, double minInfluence) {
   double goodCorSum = 0;
   deque<int> index;
 
+  // compare autocorrelation coeficient and minimal autocorrelation coeficient
   for (unsigned int i = 0; i != vect.size(); i++) {
     autoCorr[i] = autoCorr[i] / sqr_dev;
     if (abs(autoCorr[i]) > minInfluence) {
       goodCorSum += autoCorr[i];
       index.push_back(i);
-      // cout << "autocorrelation for lag " << i << " is: " << autoCorr[i] <<
-      // '\n';
     }
   }
 
@@ -310,18 +326,9 @@ double calculate_prediction(deque<double> vect, double minInfluence) {
 
   if (index.empty()) return prediction;
 
+  // calculate prediction from impactful values multiplied by their importance
   for (unsigned int i = 0; i < index.size(); i++) {
-    /* cout << "value at index " << i << " is: " << vect[index[i]] << '\n';
-     cout << "value of autocor at index " << i << " is: " << autoCorr[index[i]]
-          << '\n';
-     cout << "goodsum cor is: " << goodCorSum << '\n';*/
-    // if (index[i] == 0) {
     prediction += vect[index[i]] * (((autoCorr[index[i]]) / goodCorSum));
-    //} else {
-    // prediction += vect[index[i]] *
-    //             (((autoCorr[index[i]]) / goodCorSum) * (1.0 / (index[i])));
-    //}
-    // cout << "prediction is: " << prediction << '\n';
   }
 
   return prediction;

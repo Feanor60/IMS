@@ -25,8 +25,8 @@ all: $(TARGET)
 $(TARGET): $(SRC_FILES) #$(HEADER_FILES)
 	$(CC) $(CPP_FLAGS) -o $(TARGET) $(SRC_FILES)
 
-run: $(SRC_DIR)/plot_graph.py $(TARGET)
-	python3 ./src/plot_graph.py
+run: $(TARGET)
+	./$(TARGET)
 
 clean:
 	rm $(TARGET)
