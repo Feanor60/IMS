@@ -1,13 +1,12 @@
 /*
  * @file: main.cpp
- * @author: Vojtěch Bůbela
+ * @author: Vojtech Bubela
  * @login: xbubel08
  * @brief: implementation of AR model for IMS project
- * @description: #TODO
  */
 
 /* Minor edits by:
- * Vojtěch Fiala (xfiala61)
+ * Vojtech Fiala (xfiala61)
 */
 
 #include <math.h>
